@@ -11,7 +11,8 @@ export default new Vuex.Store({
         //文本框的内容
         inputValue:'aaa',
         //下一个ID
-        nextId:5
+        nextId:5,
+        viewKey:'all'
     },
     mutations:{
         initList(state,list){
@@ -42,11 +43,20 @@ export default new Vuex.Store({
             }
         },
         //修改列表项的选择状态
-        changeStaus(state,param){
+        changeStatus(state,param){
             const i=state.list.findIndex(x => x.id === param.id)
             if(i!=-1){
                 state.list[i].done=param.status
             }
+        },
+        //清除已完成的任务
+        cleanDone(state){
+            state.list=state.list.filter(x=>x.done===false)
+        },
+
+        //修改视图的关键字
+        changeViewKey(state,key){
+            state.viewKey=key
         }
     },
     actions:{
@@ -57,5 +67,23 @@ export default new Vuex.Store({
             })
         }
     },
-    getters:{}
+    getters:{
+        //统计未完成任务的条数
+        unDoneLength(state){
+            return state.list.filter(x=>x.done===false).length
+        },
+        //
+        infoList(state){
+            if(state.viewKey==='all'){
+                return state.list
+            }
+            if(state.viewKey==='undone'){
+                return state.list.filter(x=>!x.done)
+            }
+            if(state.viewKey==='done'){
+                return state.list.filter(x=>x.done)
+            }
+            return state.list
+        }
+    }
 })

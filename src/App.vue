@@ -5,7 +5,7 @@
 			添加事项
 		</a-button>
 
-		 <a-list bordered :dataSource="list" class="dt_list">
+		 <a-list bordered :dataSource="infoList" class="dt_list">
 			<a-list-item slot="renderItem" slot-scope="item">
 				<!-- 复选框 -->
 				<a-checkbox :checked='item.done' @change='(e)=>{cbStatusChanged(e,item.id)}'>{{item.info}}</a-checkbox>
@@ -16,22 +16,22 @@
 			<!-- footer区域 -->
 			<div slot="footer" class="footer">
 				<!-- 未完成的任务个数 -->
-				<span>0条剩余</span>
+				<span>{{unDoneLength}}条剩余</span>
 				<!-- 操作按钮 -->
 				<a-button-group>
-					<a-button type="primary">全部</a-button>
-					<a-button>未完成</a-button>
-					<a-button>已完成</a-button>
+					<a-button :type="viewKey==='all'?'primary':'default'" @click="changeList('all')">全部</a-button>
+					<a-button :type="viewKey==='undone'?'primary':'default'" @click="changeList('undone')">未完成</a-button>
+					<a-button :type="viewKey==='done'?'primary':'default'" @click="changeList('done')">已完成</a-button>
 				</a-button-group>
         		<!-- 把已经完成的任务清空 -->
-        		<a>清除已完成</a>
+        		<a @click="clean">清除已完成</a>
       		</div>
     	</a-list>
 	</div>
 </template>
 
 <script>
-	import {mapState} from 'vuex'
+	import {mapState,mapGetters} from 'vuex'
 	export default {
 		name: 'app',
 		data() {
@@ -43,7 +43,8 @@
 		},
 		computed:{
 			//把state里边的list映射为当前组件的一个计算属性
-			...mapState(['list','inputValue'])
+			...mapState(['inputValue','viewKey']),
+			...mapGetters(['unDoneLength','infoList'])
 		},
 		methods:{
 			//监听文本框内容的变化
@@ -65,14 +66,22 @@
 			},
 			//监听复选框选择中状态变化的事件
 			cbStatusChanged(e,id){
-				// console.log(e.target)
+				console.log(e.target.checked)
 				//通过e.target.checked可以接收到最新的选择中状态
-				console.log(id)
+				// console.log(id)
 				const param={
-					id:'',
+					id:id,
 					status:e.target.checked
 				}
-				this.$store.commit('changeStatus',status)
+				this.$store.commit('changeStatus',param)
+			},
+			//清除已完成的任务
+			clean(){
+				this.$store.commit('cleanDone')
+			},
+			//修改页面上展示的列表数据
+			changeList(key){
+				this.$store.commit('changeViewKey',key)
 			}
 		}
 	}
